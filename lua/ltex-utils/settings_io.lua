@@ -16,8 +16,8 @@ local ERROR = vim.log.levels.ERROR
 local function read(filename)
 	---@type integer|nil, nil|string
 	local fd, err_open = uv.fs_open(filename, "r", 438) -- 438 = 0o666
---	---@type vim.file|nil, string|nil
---	local fd, err_open = uv.fs_open(filename, "r", 420)  -- 420 = 0o644
+	--	---@type vim.file|nil, string|nil
+	--	local fd, err_open = uv.fs_open(filename, "r", 420)  -- 420 = 0o644
 	if err_open then
 		return nil, err_open
 	end
@@ -61,7 +61,7 @@ function M.read_dictionary(filename)
 		return nil, err
 	end
 
--------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------
 	---Delete this eventually. Only there to simplify switch to new
 	---dictionary file format.
 	---@cast data string
@@ -69,7 +69,7 @@ function M.read_dictionary(filename)
 	if ok_json then
 		return contents_json, nil
 	end
--------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------
 
 	---@cast data string
 	local dict = vim.split(vim.trim(data), "\n")
@@ -80,10 +80,10 @@ function M.read_dictionary(filename)
 	return dict, nil
 end
 
- ---Reads and decodes a JSON file.
- ---@param filename string name (path) of the file to be read an decoded
- ---@return table|nil # returns decoded content if successful; `nil` when an error occurs
- ---@return nil|string # respective error message or nil if successful
+---Reads and decodes a JSON file.
+---@param filename string name (path) of the file to be read an decoded
+---@return table|nil # returns decoded content if successful; `nil` when an error occurs
+---@return nil|string # respective error message or nil if successful
 function M.read_settings(filename)
 	local contents, err = read(filename)
 	if err then
@@ -108,7 +108,10 @@ end
 ---@param data string data to write
 ---@param callback function|nil function to be executed after writing
 function M.write(filepath, data, callback)
-	uv.fs_open(filepath, "w", 438,       -- 438 = 0o666
+	uv.fs_open(
+		filepath,
+		"w",
+		438, -- 438 = 0o666
 		---@param err_open nil|string
 		---@param fd integer|nil
 		function(err_open, fd)
@@ -116,21 +119,23 @@ function M.write(filepath, data, callback)
 				vim.notify("Error opening file: " .. err_open, ERROR)
 				return
 			end
-			uv.fs_write(fd, data, -1,
+			uv.fs_write(
+				fd,
+				data,
+				-1,
 				---@param err_write nil|string
 				---@param _ integer|nil bytes written
 				function(err_write, _)
 					if err_write then
-						vim.notify("Error writing to file: " ..
-												vim.inspect(err_write), ERROR)
+						vim.notify("Error writing to file: " .. vim.inspect(err_write), ERROR)
 					end
-					uv.fs_close(fd,
+					uv.fs_close(
+						fd,
 						---@param err_close nil|string
 						---@param _ boolean|nil
 						function(err_close, _)
 							if err_close then
-								vim.notify("Error closing file: " ..
-												vim.inspect(err_close), ERROR)
+								vim.notify("Error closing file: " .. vim.inspect(err_close), ERROR)
 							end
 							if callback then
 								callback()
@@ -171,8 +176,7 @@ function M.update_dictionary_files(dictionaries)
 	local used_langs = {}
 	for lang, dict in pairs(dictionaries) do
 		---@type string
-		local filename = Config.dictionary.path ..
-											Config.dictionary.filename(lang)
+		local filename = Config.dictionary.path .. Config.dictionary.filename(lang)
 		---@type string[]|nil
 		local saved_dict = M.read_dictionary(filename)
 		-- if there is already a saved dictionary merge it with current one
@@ -194,11 +198,9 @@ function M.load_dictionaries(langs)
 	local server_dics = {}
 	for _, lang in ipairs(langs) do
 		---@type string[]|nil, string|nil
-		local dict, err = M.read_dictionary(
-			Config.dictionary.path .. Config.dictionary.filename(lang)
-		)
+		local dict, err = M.read_dictionary(Config.dictionary.path .. Config.dictionary.filename(lang))
 		if err then
-			if string.sub(err, 1, 6) ~= 'ENOENT' then
+			if string.sub(err, 1, 6) ~= "ENOENT" then
 				-- if error, update user about problem and continue
 				-- loading remaining dictionaries
 				vim.notify("Error loading dicitonary: " .. err, ERROR)
