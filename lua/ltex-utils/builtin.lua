@@ -18,16 +18,9 @@ local function new_win(setting_cfg, use_diags)
 		-- delete old cache
 		win.cache = nil
 		---@type boolean, string|nil
-		local ok, err = win:new_pick_rule_win(
-			setting_cfg,
-			use_diags,
-			Config.rule_ui.telescope
-		)
+		local ok, err = win:new_pick_rule_win(setting_cfg, use_diags, Config.rule_ui.telescope)
 		if not ok then
-			vim.notify(
-				err or "Error in modifying rules",
-				vim.log.levels.WARN
-			)
+			vim.notify(err or "Error in modifying rules", vim.log.levels.WARN)
 		end
 	end
 end
@@ -39,25 +32,22 @@ builtin.write_settings_to_file = actions.write_ltex_to_file
 builtin.load_settings_from_file = actions.load_ltex_from_file
 
 ---Opens new Telescope window to modify hidden false positive rules.
-builtin.modify_hiddenFalsePositives = function ()
-	new_win(
-		"hiddenFalsePositives",
-		Config.diagnostics.diags_false_pos
-	)
+builtin.modify_hiddenFalsePositives = function()
+	new_win("hiddenFalsePositives", Config.diagnostics.diags_false_pos)
 end
 
 ---Opens new Telescope window to modify disabled rules list.
-builtin.modify_disabledRules = function ()
+builtin.modify_disabledRules = function()
 	new_win("disabledRules", Config.diagnostics.diags_disable_rules)
 end
 
 ---Opens new Telescope window to modify dictionaries (including saved ones).
-builtin.modify_dict = function ()
+builtin.modify_dict = function()
 	new_win("dictionary", false)
 end
 
 ---Toggles the LTeX diagnostics hints on/off
-builtin.toggle_diagnostics = function ()
+builtin.toggle_diagnostics = function()
 	diagnostics.toggle_diags(vim.api.nvim_get_current_buf())
 end
 
